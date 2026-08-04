@@ -1,0 +1,3 @@
+# TriviaEngine
+
+Projeto reorganizado.

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivia+</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <header>
+        <h1>🧠 Trivia+</h1>
+        <p>Teste seus conhecimentos</p>
+    </header>
+
+
+    <section id="menu" class="tela">
+
+        <h2>Escolha uma categoria</h2>
+
+        <button onclick="iniciarJogo('geral')">
+            🌎 Conhecimentos Gerais
+        </button>
+
+        <button onclick="iniciarJogo('brasil')">
+            🇧🇷 Brasil
+        </button>
+
+        <button onclick="iniciarJogo('historia')">
+            📜 História
+        </button>
+
+        <button onclick="iniciarJogo('geografia')">
+            🌍 Geografia
+        </button>
+
+        <button onclick="iniciarJogo('ciencias')">
+            🔬 Ciências
+        </button>
+
+        <button onclick="iniciarJogo('cultura')">
+            🎬 Cultura
+        </button>
+
+        <button onclick="iniciarJogo('esportes')">
+            ⚽ Esportes
+        </button>
+
+        <button onclick="iniciarJogo('musica')">
+            🎵 Música
+        </button>
+
+        <button onclick="iniciarJogo('tecnologia')">
+            💻 Tecnologia
+        </button>
+
+        <button onclick="iniciarJogo('curiosidades')">
+            🤔 Curiosidades
+        </button>
+
+    </section>
+
+
+
+    <section id="jogo" class="tela escondido">
+
+        <div class="status">
+
+            <span>
+                Pergunta:
+                <b id="numeroPergunta">1</b>/10
+            </span>
+
+            <span>
+                Pontos:
+                <b id="pontuacao">0</b>
+            </span>
+
+        </div>
+
+
+        <h2 id="pergunta">
+            Pergunta aparece aqui
+        </h2>
+
+
+        <div id="alternativas"></div>
+
+
+        <div id="mensagem"></div>
+
+
+    </section>
+
+
+
+
+    <section id="resultado" class="tela escondido">
+
+        <h2>Resultado</h2>
+
+        <p id="resultadoTexto"></p>
+
+
+        <button onclick="voltarMenu()">
+            🔄 Jogar novamente
+        </button>
+
+    </section>
+
+
+</div>
+
+
+<script src="perguntas.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
