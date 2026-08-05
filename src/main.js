@@ -1,10 +1,23 @@
+import TriviaEngine from "./core/Engine.js";
+import UI from "./ui/UI.js";
+import Storage from "./services/Storage.js";
+import perguntasPadrao from "./data/Questions.js";
 
-const app=document.getElementById('app')||document.body;
-const perguntas=[{p:'Qual é a capital do Brasil?',a:['Rio','Brasília','SP','Salvador'],c:1}];
-function render(){
- const q=perguntas[0];
- app.innerHTML=`<h1>Trivia Engine</h1><h2>${q.p}</h2>`+
- q.a.map((x,i)=>`<button onclick="window.resp(${i})">${x}</button>`).join('<br>');
+Storage.init(perguntasPadrao);
+
+const engine = new TriviaEngine({
+    perguntasPorPartida: 10,
+    embaralharPerguntas: true,
+    embaralharAlternativas: true,
+    tempoPorPergunta: 20,
+    vidas: 3
+});
+
+const ui = new UI(engine, Storage);
+ui.telaCategorias();
+
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
 }
-window.resp=i=>{alert(i===perguntas[0].c?'Correto!':'Errado!');}
-render();

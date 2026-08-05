@@ -994,3 +994,5 @@ if (typeof module !== "undefined") {
     module.exports = TriviaEngine;
 
 }
+
+export default TriviaEngine;

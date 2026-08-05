@@ -1,3 +1,38 @@
-# TriviaEngine
+# Trivia Engine
 
-Projeto reorganizado.
+Jogo de perguntas e respostas (trivia) client-side, sem backend — roda direto no navegador (GitHub Pages).
+
+## Estrutura
+
+```
+index.html              # tela do jogo
+admin/                  # painel administrativo (categorias e perguntas)
+assets/css/style.css    # estilos
+assets/images/          # imagens (vazio por enquanto)
+assets/sounds/          # sons (vazio por enquanto)
+src/core/Engine.js      # motor do jogo (pontuação, vidas, cronômetro, eventos)
+src/ui/UI.js            # renderização das telas
+src/services/Storage.js # persistência (localStorage): categorias, ranking, progresso
+src/data/Questions.js   # perguntas padrão
+manifest.json / sw.js   # suporte a PWA (instalável, funciona offline)
+```
+
+## Como funciona
+
+- As perguntas padrão ficam em `src/data/Questions.js`.
+- O painel em `/admin` permite criar novas categorias e perguntas, salvas no `localStorage` do navegador (por enquanto local ao dispositivo — sem sincronização entre usuários).
+- O ranking e o progresso do jogador também ficam salvos no `localStorage`.
+
+## Rodando localmente
+
+Como o projeto usa ES Modules, precisa de um servidor local (não abrir o `index.html` direto com `file://`):
+
+```bash
+npx serve .
+```
+
+## Próximos passos sugeridos
+
+- Adicionar imagens/sons em `assets/`
+- Editar/remover perguntas customizadas no admin (hoje só é possível adicionar)
+- Ícones do PWA em `manifest.json`
