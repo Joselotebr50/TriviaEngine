@@ -1,9 +1,10 @@
 // Camada de persistência (localStorage).
-// Junta perguntas padrão (Questions.js) + perguntas/categorias criadas no admin,
-// e monta o "bancoPerguntas" global que o Engine.js espera encontrar.
+// Todo o banco de perguntas (padrão + criado no admin) vive em uma única
+// chave no localStorage, o que permite editar/excluir qualquer pergunta ou
+// categoria (inclusive as que vieram de Questions.js).
 
 const CHAVES = {
-    categoriasCustom: "trivia_categorias_custom",
+    banco: "trivia_banco",
     ranking: "trivia_ranking",
     progresso: "trivia_progresso"
 };
@@ -28,73 +29,95 @@ function escrever(chave, valor) {
 
 export default class Storage {
 
-    // ---------- Categorias / Perguntas ----------
+    // ---------- Inicialização ----------
 
-    // Combina categorias padrão (Questions.js) com as customizadas (admin)
-    // e publica window.bancoPerguntas no formato { catId: [ {alternativas, correta}, ... ] }
+    // Na primeira vez, copia as perguntas padrão (Questions.js) pro localStorage.
+    // Nas próximas vezes, usa o que já está salvo (preservando edições do admin),
+    // só adicionando categorias novas que tenham surgido no código.
     static init(perguntasPadrao) {
-        this.padrao = perguntasPadrao;
-        this._reconstruirBanco();
+        let banco = ler(CHAVES.banco, null);
+
+        if (!banco) {
+            banco = {};
+            Object.entries(perguntasPadrao).forEach(([id, cat]) => {
+                banco[id] = { nome: cat.nome, perguntas: JSON.parse(JSON.stringify(cat.perguntas)) };
+            });
+        } else {
+            Object.entries(perguntasPadrao).forEach(([id, cat]) => {
+                if (!banco[id]) {
+                    banco[id] = { nome: cat.nome, perguntas: JSON.parse(JSON.stringify(cat.perguntas)) };
+                }
+            });
+        }
+
+        this._banco = banco;
+        escrever(CHAVES.banco, banco);
+        this._publicarBancoGlobal();
     }
 
-    static _categoriasCustom() {
-        return ler(CHAVES.categoriasCustom, {});
-    }
-
-    static _reconstruirBanco() {
-        const custom = this._categoriasCustom();
-        const banco = {};
-        const categorias = [];
-
-        Object.entries(this.padrao || {}).forEach(([id, cat]) => {
-            categorias.push({ id, nome: cat.nome, origem: "padrao" });
-            banco[id] = [...cat.perguntas];
+    static _publicarBancoGlobal() {
+        const flat = {};
+        Object.entries(this._banco).forEach(([id, cat]) => {
+            flat[id] = cat.perguntas;
         });
-
-        Object.entries(custom).forEach(([id, cat]) => {
-            const existente = categorias.find(c => c.id === id);
-            if (existente) {
-                banco[id] = [...(banco[id] || []), ...(cat.perguntas || [])];
-            } else {
-                categorias.push({ id, nome: cat.nome, origem: "admin" });
-                banco[id] = [...(cat.perguntas || [])];
-            }
-        });
-
-        window.bancoPerguntas = banco;
-        this._categorias = categorias;
+        window.bancoPerguntas = flat;
     }
+
+    static _salvar() {
+        escrever(CHAVES.banco, this._banco);
+        this._publicarBancoGlobal();
+    }
+
+    // ---------- Categorias ----------
 
     static getCategorias() {
-        return this._categorias || [];
+        return Object.entries(this._banco).map(([id, cat]) => ({ id, nome: cat.nome }));
     }
 
     static adicionarCategoria(id, nome) {
-        const custom = this._categoriasCustom();
-        if (!custom[id]) {
-            custom[id] = { nome, perguntas: [] };
+        if (!this._banco[id]) {
+            this._banco[id] = { nome, perguntas: [] };
+            this._salvar();
         }
-        escrever(CHAVES.categoriasCustom, custom);
-        this._reconstruirBanco();
+    }
+
+    static renomearCategoria(id, novoNome) {
+        if (this._banco[id]) {
+            this._banco[id].nome = novoNome;
+            this._salvar();
+        }
+    }
+
+    static removerCategoria(id) {
+        delete this._banco[id];
+        this._salvar();
+    }
+
+    // ---------- Perguntas ----------
+
+    static getPerguntas(categoriaId) {
+        return (this._banco[categoriaId] && this._banco[categoriaId].perguntas) || [];
     }
 
     static adicionarPergunta(categoriaId, pergunta) {
-        const custom = this._categoriasCustom();
-        if (!custom[categoriaId]) {
-            const meta = this._categorias.find(c => c.id === categoriaId);
-            custom[categoriaId] = { nome: meta ? meta.nome : categoriaId, perguntas: [] };
+        if (!this._banco[categoriaId]) return;
+        this._banco[categoriaId].perguntas.push(pergunta);
+        this._salvar();
+    }
+
+    static editarPergunta(categoriaId, indice, pergunta) {
+        const cat = this._banco[categoriaId];
+        if (cat && cat.perguntas[indice]) {
+            cat.perguntas[indice] = pergunta;
+            this._salvar();
         }
-        custom[categoriaId].perguntas.push(pergunta);
-        escrever(CHAVES.categoriasCustom, custom);
-        this._reconstruirBanco();
     }
 
     static removerPergunta(categoriaId, indice) {
-        const custom = this._categoriasCustom();
-        if (custom[categoriaId] && custom[categoriaId].perguntas[indice]) {
-            custom[categoriaId].perguntas.splice(indice, 1);
-            escrever(CHAVES.categoriasCustom, custom);
-            this._reconstruirBanco();
+        const cat = this._banco[categoriaId];
+        if (cat && cat.perguntas[indice] !== undefined) {
+            cat.perguntas.splice(indice, 1);
+            this._salvar();
         }
     }
 
