@@ -1,6 +1,41 @@
 import Storage from "../src/services/Storage.js";
 import perguntasPadrao from "../src/data/Questions.js";
 
+// Proteção simples por senha (não é segurança real — só impede acesso casual,
+// já que é um site estático sem servidor/backend).
+const HASH_SENHA = "b00250e7e9759b4fff00d370a3b467864e7b028fa211a4c0e5f29e30ae79c51f";
+
+async function sha256(texto) {
+    const buffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(texto));
+    return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function autenticar() {
+    if (sessionStorage.getItem("admin_autenticado") === "1") return true;
+
+    const senha = prompt("Senha do painel admin:");
+    if (senha === null) return false;
+
+    const hash = await sha256(senha);
+    if (hash === HASH_SENHA) {
+        sessionStorage.setItem("admin_autenticado", "1");
+        return true;
+    }
+
+    alert("Senha incorreta.");
+    return false;
+}
+
+const ok = await autenticar();
+if (!ok) {
+    document.getElementById("app").innerHTML = `
+        <header><h1>Acesso negado</h1></header>
+        <p>Senha incorreta ou não informada.</p>
+        <p><a href="../index.html">← Voltar ao jogo</a></p>
+    `;
+    throw new Error("Acesso não autorizado ao admin");
+}
+
 Storage.init(perguntasPadrao);
 
 const app = document.getElementById("app");

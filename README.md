@@ -31,6 +31,20 @@ Como o projeto usa ES Modules, precisa de um servidor local (não abrir o `index
 npx serve .
 ```
 
+## Painel admin
+
+Acesse `/admin` — pede uma senha antes de liberar o acesso.
+
+- **Senha padrão:** `trivia2026` (troque assim que possível)
+- Para trocar a senha: gere o hash SHA-256 da nova senha e substitua a constante
+  `HASH_SENHA` no início de `admin/admin.js`. Exemplo (Node.js):
+  ```js
+  require("crypto").createHash("sha256").update("sua-nova-senha").digest("hex")
+  ```
+- **Atenção:** por ser um site estático (sem servidor), essa senha só impede acesso
+  casual — alguém com conhecimento técnico pode ler o código-fonte e contornar.
+  Não é adequado para dados sensíveis.
+
 ## Próximos passos sugeridos
 
 - Adicionar imagens/sons em `assets/`
