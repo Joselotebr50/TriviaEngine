@@ -35,7 +35,7 @@ export default class UI {
         });
 
         this.engine.on("finalizado", (dados) => {
-            this.telaResultado(dados.estatisticas);
+            this._statsFinal = dados.estatisticas;
         });
     }
 
@@ -145,7 +145,10 @@ export default class UI {
         msg.textContent = resultado.acertou ? "✅ Acertou!" : (resultado.tempoEsgotado ? "⏰ Tempo esgotado!" : "❌ Errou!");
 
         setTimeout(() => {
-            if (this.engine.terminou()) return;
+            if (this.engine.terminou()) {
+                this.telaResultado(this._statsFinal);
+                return;
+            }
             this.renderPergunta(this.engine.perguntaAtual());
             this.engine.iniciarCronometro();
         }, 900);
