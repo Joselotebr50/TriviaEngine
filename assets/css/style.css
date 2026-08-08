@@ -1,65 +1,338 @@
-* {
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
+/* ============================================================
+   Trivia Engine — identidade visual "game show / bilhete"
+   ============================================================ */
+
+:root {
+    --ink: #14132b;
+    --ink-2: #1a1938;
+    --card: #1e1d3f;
+    --card-edge: #2a2856;
+    --gold: #f5b942;
+    --gold-deep: #c98f22;
+    --coral: #ff6b6b;
+    --coral-deep: #c94848;
+    --teal: #2dd4bf;
+    --teal-deep: #1ea394;
+    --paper: #f5f1ff;
+    --muted: #8b87b0;
+
+    --font-display: "Archivo Black", "Arial Black", sans-serif;
+    --font-body: "Space Grotesk", system-ui, sans-serif;
+    --font-mono: "Space Mono", "Courier New", monospace;
+
+    --radius: 16px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-body);
+    min-height: 100%;
 }
 
 body {
-    margin: 0;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background-image:
+        radial-gradient(circle at 15% 10%, rgba(245, 185, 66, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 90%, rgba(45, 212, 191, 0.08), transparent 40%);
 }
 
 .app {
-    width: 95%;
-    max-width: 500px;
-    background: white;
-    border-radius: 20px;
-    padding: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px 18px 48px;
 }
+
+/* ---------- Cabeçalho ---------- */
 
 header {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
 }
 
-button {
-    width: 100%;
-    padding: 15px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 12px;
-    background: #2563eb;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
+header h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 0.5px;
+    margin: 0 0 4px;
+    color: var(--gold);
+    text-shadow: 3px 3px 0 var(--gold-deep);
+    transform: rotate(-1deg);
+    display: inline-block;
 }
 
-button:hover {
-    opacity: .9;
+header p {
+    color: var(--muted);
+    margin: 0;
+    font-size: 14px;
 }
+
+header a {
+    color: var(--teal);
+    text-decoration: none;
+    font-size: 13px;
+}
+
+/* ---------- Barra de status (placar / vidas / tempo) ---------- */
 
 .status {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    background: var(--card);
+    border: 1px solid var(--card-edge);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+}
+
+#pontuacao { color: var(--gold); font-weight: 700; }
+#vidas { letter-spacing: 2px; }
+#tempo {
+    color: var(--paper);
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--ink-2);
+}
+#tempo.urgente {
+    color: var(--coral);
+    animation: pulso 0.6s ease-in-out infinite;
+}
+
+/* ---------- Cartão-ingresso da pergunta ---------- */
+
+#pergunta {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 19px;
+    line-height: 1.4;
+    color: var(--paper);
+    background: var(--card);
+    border: 1px dashed var(--card-edge);
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    margin: 0 0 16px;
+    position: relative;
+    animation: entra 0.35s ease-out;
+}
+
+#pergunta::before,
+#pergunta::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: var(--ink);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+#pergunta::before { left: -9px; }
+#pergunta::after { right: -9px; }
+
+/* ---------- Alternativas (botões "buzzer") ---------- */
+
+#alternativas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
 #alternativas button {
-    background: #f3f4f6;
-    color: #111827;
-    border: 2px solid #e5e7eb;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    text-align: left;
+    color: var(--paper);
+    background: var(--card);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 12px 14px 40px;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--card-edge);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
-.escondido {
-    display: none;
+#alternativas button:hover:not(:disabled) {
+    background: var(--ink-2);
 }
+
+#alternativas button:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 var(--card-edge);
+}
+
+#alternativas button::before {
+    content: attr(data-letra);
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    background: var(--ink-2);
+    color: var(--muted);
+    border-radius: 6px;
+}
+
+#alternativas button:disabled { cursor: default; opacity: 0.55; }
+
+#alternativas button.correta {
+    background: var(--gold);
+    color: var(--ink);
+    box-shadow: 0 4px 0 var(--gold-deep);
+    opacity: 1;
+}
+#alternativas button.correta::before { background: var(--ink); color: var(--gold); }
+
+#alternativas button.errada {
+    background: var(--coral);
+    color: var(--ink);
+    box-shadow: 0 4px 0 var(--coral-deep);
+    opacity: 1;
+    animation: tremor 0.4s ease;
+}
+#alternativas button.errada::before { background: var(--ink); color: var(--coral); }
+
+/* ---------- Mensagem de feedback ---------- */
 
 #mensagem {
     text-align: center;
-    font-weight: bold;
-    margin-top: 15px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 14px;
+    min-height: 20px;
+    margin-top: 14px;
+    color: var(--teal);
+}
+
+/* ---------- Lista de categorias ---------- */
+
+#lista-categorias {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+#lista-categorias button {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 16px;
+    text-align: left;
+    color: var(--paper);
+    background: var(--card);
+    border: none;
+    border-left: 6px solid var(--gold);
+    border-radius: 10px;
+    padding: 16px 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--card-edge);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+#lista-categorias button:nth-child(3n+2) { border-left-color: var(--teal); }
+#lista-categorias button:nth-child(3n+3) { border-left-color: var(--coral); }
+
+#lista-categorias button:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 var(--card-edge);
+}
+#lista-categorias button:disabled { opacity: 0.4; cursor: default; }
+
+/* ---------- Botões genéricos (telas de resultado, ranking, admin) ---------- */
+
+button {
+    font-family: var(--font-body);
+}
+
+#app > button,
+.app > button {
+    display: block;
+    width: 100%;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--gold);
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    margin: 8px 0;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--gold-deep);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+#app > button:active,
+.app > button:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 var(--gold-deep);
+}
+
+#btn-menu, #btn-voltar { background: var(--card); color: var(--paper); box-shadow: 0 4px 0 var(--card-edge); }
+#btn-menu:active, #btn-voltar:active { box-shadow: 0 0 0 var(--card-edge); }
+
+input, select, textarea {
+    font-family: var(--font-body);
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--card-edge);
+    color: var(--paper);
+    padding: 11px 12px;
+    border-radius: 10px;
+    margin: 6px 0;
+    font-size: 14px;
+}
+input::placeholder, textarea::placeholder { color: var(--muted); }
+
+/* ---------- Ranking ---------- */
+
+#lista-ranking p {
+    font-family: var(--font-mono);
+    background: var(--card);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 6px 0;
+}
+#lista-ranking p:first-child {
+    border-left: 4px solid var(--gold);
+    color: var(--gold);
+    font-weight: 700;
+}
+
+/* ---------- Utilitário ---------- */
+
+.escondido { display: none; }
+
+/* ---------- Animações ---------- */
+
+@keyframes entra {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes tremor {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+@keyframes pulso {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+
+@media (max-width: 380px) {
+    #alternativas { grid-template-columns: 1fr; }
 }

@@ -17,20 +17,33 @@ export default class UI {
         this.engine.on("novaPergunta", () => {});
 
         this.engine.on("resposta", (resultado) => {
+            this._colorirAlternativas(resultado);
             this._mostrarFeedback(resultado);
         });
 
         this.engine.on("tempo", (segundos) => {
             const el = document.getElementById("tempo");
-            if (el) el.textContent = `⏱ ${segundos}s`;
+            if (el) {
+                el.textContent = `⏱ ${segundos}s`;
+                el.classList.toggle("urgente", segundos <= 5);
+            }
         });
 
         this.engine.on("tempoEsgotado", () => {
+            this._colorirAlternativas({ acertou: false, respostaSelecionada: -1, respostaCorreta: this.engine.perguntaAtual()?.correta });
             this._mostrarFeedback({ acertou: false, tempoEsgotado: true });
         });
 
         this.engine.on("finalizado", (dados) => {
             this.telaResultado(dados.estatisticas);
+        });
+    }
+
+    _colorirAlternativas(resultado) {
+        const botoes = Array.from(document.getElementById("alternativas")?.children || []);
+        botoes.forEach((btn, i) => {
+            if (i === resultado.respostaCorreta) btn.classList.add("correta");
+            else if (i === resultado.respostaSelecionada) btn.classList.add("errada");
         });
     }
 
@@ -109,9 +122,11 @@ export default class UI {
 
         const container = document.getElementById("alternativas");
         container.innerHTML = "";
+        const letras = ["A", "B", "C", "D"];
         pergunta.alternativas.forEach((alt, i) => {
             const btn = document.createElement("button");
             btn.textContent = alt;
+            btn.dataset.letra = letras[i] || (i + 1);
             btn.onclick = () => this._responder(i);
             container.appendChild(btn);
         });
