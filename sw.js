@@ -1,4 +1,4 @@
-const CACHE = "trivia-v1";
+const CACHE = "trivia-v2";
 const ARQUIVOS = [
     "./",
     "./index.html",

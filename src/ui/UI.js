@@ -60,6 +60,7 @@ export default class UI {
                 </header>
                 <div id="lista-categorias"></div>
                 <button id="btn-ranking">🏆 Ver Ranking</button>
+                <p style="text-align:center; margin-top:18px;"><a href="admin/index.html" style="color:var(--muted); font-size:12px;">painel admin</a></p>
             </div>
         `;
 
